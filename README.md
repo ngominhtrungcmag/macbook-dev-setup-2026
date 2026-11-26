@@ -61,6 +61,16 @@ bash install.sh --mode ai
 
 Core tools and core VS Code extensions are included in every mode.
 
+### Everyday setup
+
+```bash
+bash install.sh --dry-run --mode everyday
+bash install.sh --mode everyday
+bash scripts/setup.sh --check apps frontend terminal
+```
+
+The shared `apps` profile includes iTerm2, Rectangle, DBeaver Community, Postman, AppCleaner (macOS 15+), Stats (macOS 12+) and The Unarchiver. The preview shows the Brewfile conditions. Homebrew evaluates them at install and check time. See the [first-day checklist](docs/checklist.md) for sign-in, licenses and macOS permissions.
+
 ```bash
 bash install.sh --list
 bash install.sh --dry-run --mode full

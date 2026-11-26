@@ -6,6 +6,14 @@ full="$(bash install.sh --dry-run)"
 for expected in 'Mode: full' 'dotnet-sdk@10' 'cask "rider"' 'cask "codex"' 'cask "claude-code"' 'cask "antigravity-cli"' 'cask "chatgpt"' 'cask "cursor"' 'mise install node@26' 'uv python install 3.13' 'ms-dotnettools.csharp'; do
   grep -Fq "$expected" <<< "$full"
 done
+everyday="$(bash install.sh --dry-run --mode everyday)"
+frontend="$(bash install.sh --dry-run --mode frontend)"
+for app in appcleaner stats the-unarchiver; do
+  for output in "$everyday" "$full"; do
+    [[ "$(grep -Fc "cask \"$app\"" <<< "$output")" == 1 ]] || { echo "Expected one $app cask in everyday and full previews" >&2; exit 1; }
+  done
+  if grep -Fq "cask \"$app\"" <<< "$frontend"; then exit 1; fi
+done
 minimal="$(bash install.sh --dry-run --mode minimal)"
 grep -q 'Mode: minimal' <<< "$minimal"
 if grep -Eq 'dotnet-sdk@10|cask "codex"|Runtime: mise' <<< "$minimal"; then exit 1; fi
