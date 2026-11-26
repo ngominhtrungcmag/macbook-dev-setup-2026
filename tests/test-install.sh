@@ -3,7 +3,7 @@ set -euo pipefail
 root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$root"
 full="$(bash install.sh --dry-run)"
-for expected in 'Mode: full' 'dotnet-sdk@10' 'cask "rider"' 'cask "codex"' 'cask "claude-code"' 'cask "antigravity-cli"' 'cask "chatgpt"' 'cask "cursor"' 'Node.js 26' 'uv python install 3.13' 'ms-dotnettools.csharp'; do
+for expected in 'Mode: full' 'dotnet-sdk@10' 'cask "rider"' 'cask "codex"' 'cask "claude-code"' 'cask "antigravity-cli"' 'cask "chatgpt"' 'cask "cursor"' 'mise install node@26' 'uv python install 3.13' 'ms-dotnettools.csharp'; do
   grep -Fq "$expected" <<< "$full"
 done
 minimal="$(bash install.sh --dry-run --mode minimal)"
@@ -21,9 +21,7 @@ output="$(bash install.sh --dry-run --mode custom dotnet ai-codex dotnet)"
 [[ "$(grep -c '^--- profiles/dotnet.Brewfile ---$' <<< "$output")" == 1 ]]
 grep -q 'cask "codex"' <<< "$output"
 if grep -q 'cask "claude-code"' <<< "$output"; then exit 1; fi
-for bad in invalid; do
-  if bash install.sh --dry-run --mode "$bad" >/dev/null 2>&1; then exit 1; fi
-done
+if bash install.sh --dry-run --mode invalid >/dev/null 2>&1; then exit 1; fi
 if bash install.sh --mode custom --dry-run >/dev/null 2>&1; then exit 1; fi
 if bash install.sh --mode minimal dotnet --dry-run >/dev/null 2>&1; then exit 1; fi
 if bash install.sh --mode ai --skip-ai --dry-run >/dev/null 2>&1; then exit 1; fi

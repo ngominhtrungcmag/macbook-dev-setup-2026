@@ -81,6 +81,7 @@ MENU
       echo 'Profiles: dotnet frontend mobile devops python apps terminal ide ai-codex ai-claude ai-google ai-desktop'
       printf 'Enter space-separated profiles: '
       IFS=' ' read -r -a chosen || exit 0
+      [[ -n "${chosen[0]:-}" ]] || { echo 'Custom mode needs at least one profile.' >&2; exit 2; }
       for item in "${chosen[@]}"; do
         case "$item" in
           dotnet|frontend|mobile|devops|python|apps|terminal|ide|ai-codex|ai-claude|ai-google|ai-desktop)
@@ -155,6 +156,9 @@ if [[ "$preview" == true ]]; then
   exit 0
 fi
 
+# Run runtime tools only from the reviewed repository, not the caller's project directory.
+cd "$root"
+
 # Platform bootstrap is mandatory. Do not use sudo for the entire installer.
 [[ "$(uname -s)" == Darwin ]] || { echo 'This installer requires macOS.' >&2; exit 1; }
 [[ "$(id -u)" != 0 ]] || { echo 'Run as your normal macOS user, not root.' >&2; exit 1; }
@@ -185,7 +189,7 @@ if ! command -v brew >/dev/null 2>&1; then
     echo 'Installing Homebrew from its official upstream installer. Review its prompt.'
     download="$(mktemp -t macbook-brew-install)"
     trap 'rm -f -- "$download"' EXIT
-    /usr/bin/curl --fail --show-error --silent --location --proto '=https' \
+    /usr/bin/curl --fail --show-error --silent --location --proto '=https' --proto-redir '=https' \
       https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh -o "$download"
     /bin/bash "$download"
     rm -f -- "$download"
@@ -214,11 +218,14 @@ run_stage 'Homebrew packages' bash "$root/scripts/setup.sh" "${package_args[@]}"
 # Existing runtime configuration is respected; only new users get a global Node default.
 install_node() {
   command -v mise >/dev/null 2>&1 || return 1
-  mise install node@26 || return 1
-  local config_base="${XDG_CONFIG_HOME:-$HOME/.config}/mise"
+  local config_base="${XDG_CONFIG_HOME:-$HOME/.config}/mise" fresh_config=false
   if [[ -z "${MISE_CONFIG_DIR:-}" && -z "${MISE_GLOBAL_CONFIG_FILE:-}" && -z "${MISE_CONFIG_FILE:-}" && \
         ! -e "$config_base" && ! -L "$config_base" && ! -e "$HOME/.mise.toml" && \
         ! -e "$HOME/.tool-versions" ]]; then
+    fresh_config=true
+  fi
+  mise install node@26 || return 1
+  if [[ "$fresh_config" == true ]]; then
     mise use -g node@26 || return 1
   else
     echo 'Existing mise configuration preserved. Use mise exec node@26 -- node as needed.'
