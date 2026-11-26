@@ -25,11 +25,13 @@ if [[ "$mode" == apply ]]; then
   command -v code >/dev/null 2>&1 || { echo 'Install the VS Code shell command from its Command Palette first.' >&2; exit 1; }
 fi
 printf 'VS Code profile: %s (%s)\n' "$profile" "$mode"
+status=0
 for group in "${groups[@]}"; do
   while IFS= read -r id || [[ -n "$id" ]]; do
     case "$id" in ''|\#*) continue ;; esac
     [[ "$id" =~ ^[A-Za-z0-9_-]+\.[A-Za-z0-9_.-]+$ ]] || { echo "Invalid extension ID: $id" >&2; exit 2; }
     printf '  %s\n' "$id"
-    if [[ "$mode" == apply ]]; then code --profile "$profile" --install-extension "$id"; fi
+    if [[ "$mode" == apply ]]; then code --profile "$profile" --install-extension "$id" || status=1; fi
   done < "$root/extensions/$group.txt"
 done
+exit "$status"

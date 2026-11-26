@@ -1,26 +1,32 @@
-# AI coding tools (opt-in)
+# AI apps and coding agents
 
-Use one or more explicit profiles. No credentials are collected, no agents are launched, and no authentication or permission changes are automated.
-
-| Profile | Homebrew package | Documentation |
-| --- | --- | --- |
-| ai-codex | codex cask | https://github.com/openai/codex |
-| ai-claude | claude-code cask | https://formulae.brew.sh/cask/claude-code |
-| ai-google | antigravity-cli cask | https://antigravity.google/product/antigravity-cli |
+The one-command Full and AI modes include these packages. Other named modes omit them unless you add `--with-ai`. Use `--skip-ai` with Full to exclude them.
 
 ```bash
-bash scripts/setup.sh --dry-run ai-codex ai-claude ai-google
-bash scripts/setup.sh ai-codex
+bash install.sh --mode ai --dry-run
+bash install.sh --mode ai
+bash install.sh --mode dotnet --with-ai
+bash install.sh --mode full --skip-ai
 ```
 
-`all` deliberately excludes these tools; `ai` selects all three. Sign in manually according to vendor documentation. Check billing, data handling and organization policy; review tool permissions, avoid unrestricted access, and never send secrets or regulated data to an unapproved service.
+| Profile | Homebrew packages |
+| --- | --- |
+| ai-codex | codex |
+| ai-claude | claude-code |
+| ai-google | antigravity-cli |
+| ai-desktop | chatgpt, claude, cursor, antigravity |
 
-## Gemini CLI migration
+The standalone `codex-app` cask is deprecated in favor of `chatgpt` in Homebrew's catalog. Gemini CLI is not installed by default following Google's migration to Antigravity CLI for individual users; existing supported users should follow official account-specific instructions.
 
-Google announced the move to Antigravity CLI on 19 May 2026. Individual/free/Google AI Pro/Ultra usage stopped receiving requests via Gemini CLI on 18 June 2026; enterprise licensing and paid API-key cases are distinct. Homebrew marks its Gemini CLI formula deprecated, with a listed disable date of 18 December 2026. We do not include it in the default installer. Existing supported users should follow Google's migration and authentication documentation.
+Installation does not start agents, sign into accounts, grant permissions or change billing. Verify application compatibility and licensing, and follow organizational policies for confidential data.
 
-Sources:
-- https://developers.googleblog.com/an-important-update-transitioning-gemini-cli-to-antigravity-cli/
-- https://developers.google.com/gemini-code-assist/docs/deprecations/code-assist-individuals
-- https://formulae.brew.sh/formula/gemini-cli
+References:
+- https://formulae.brew.sh/cask/codex
+- https://formulae.brew.sh/cask/claude-code
 - https://formulae.brew.sh/cask/antigravity-cli
+- https://formulae.brew.sh/cask/codex-app
+- https://formulae.brew.sh/cask/chatgpt
+- https://formulae.brew.sh/cask/claude
+- https://formulae.brew.sh/cask/cursor
+- https://formulae.brew.sh/cask/antigravity
+- https://developers.googleblog.com/an-important-update-transitioning-gemini-cli-to-antigravity-cli/
