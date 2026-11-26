@@ -8,6 +8,22 @@ A macOS bootstrap toolkit for a new or existing MacBook: apps, command-line tool
 
 ## Quick start
 
+### With Homebrew
+
+After the first Homebrew release is published, run these commands on a Mac that already has Homebrew:
+
+```bash
+brew tap ngominhtrungcmag/macbook-dev-setup
+brew trust --formula ngominhtrungcmag/macbook-dev-setup/macbook-dev-setup
+brew install ngominhtrungcmag/macbook-dev-setup/macbook-dev-setup
+macbook-dev-setup --dry-run --mode frontend
+macbook-dev-setup --menu
+```
+
+Run the trust command on Homebrew versions that require tap trust. The formula installs the setup command and its manifests. Choose a mode with `--menu` or pass `--mode NAME` directly to install the selected tools. Run `brew upgrade macbook-dev-setup` to update the setup command.
+
+### On a fresh Mac
+
 Review [install.sh](install.sh) and the [package manifests](profiles/) before running. On a fresh Mac with no Git yet, download the repository archive using macOS's built-in curl and tar, then run the installer in one terminal command (this tracks the mutable main branch; use an audited commit/tag archive for repeatable production use):
 
 ```bash

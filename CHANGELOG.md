@@ -2,6 +2,7 @@
 
 ## Unreleased — one-command installer (v0.7)
 
+- Add a Homebrew release pipeline and a `macbook-dev-setup` command that runs without a source checkout.
 - Add root install.sh with Full, Minimal, .NET, Frontend, Mobile, DevOps, Python, AI, Everyday and Custom modes; optional menu and dry-run.
 - Bootstrap Apple CLT and official Homebrew when missing; install Node.js, Python and dedicated VS Code extensions automatically by selected mode.
 - Add Rider and AI desktop applications alongside existing agents. Support AI opt-in/out and continue past failed package groups.

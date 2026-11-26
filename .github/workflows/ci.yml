@@ -1,5 +1,9 @@
 name: Shell checks
-on: [push, pull_request]
+on:
+  push:
+    branches: ['**']
+  pull_request:
+  workflow_call:
 permissions:
   contents: read
 jobs:
@@ -20,3 +24,6 @@ jobs:
         run: shellcheck install.sh scripts/*.sh tests/*.sh
       - name: Validate JSON starter files
         run: python3 -m json.tool dotfiles/dot_config/macbook-dev-setup/vscode-settings.json >/dev/null
+      - name: Install and test the Homebrew formula
+        if: runner.os == 'macOS'
+        run: bash tests/test-homebrew.sh

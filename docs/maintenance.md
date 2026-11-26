@@ -45,3 +45,16 @@ The install script can be rerun after resolving an error, but it does not provid
 - [ ] Test core and each optional profile on a disposable or fresh Mac environment.
 - [ ] Verify SDK support tables, app licenses and README instructions.
 - [ ] Record the macOS version, architecture and date of real installation testing.
+
+## Homebrew releases
+
+Create the public repository `ngominhtrungcmag/homebrew-macbook-dev-setup` and initialize its default branch. In the source repository, set the Actions secret `HOMEBREW_TAP_TOKEN` to a fine-grained GitHub token scoped to that tap with **Contents: Read and write**. The tap's default branch must allow writes from the token's owner.
+
+Once the workflow is on the default branch, tag the tested commit with an unused version and push the tag:
+
+```bash
+git tag -a v0.7.0 -m "Release v0.7.0"
+git push origin v0.7.0
+```
+
+The tag workflow runs CI, publishes the runtime archive and its SHA-256-pinned formula as release assets, then updates the tap. If updating the tap fails after publication, fix the issue and rerun the failed job for the same tag. To verify the published package, follow the Homebrew quick start in the README and run `brew test macbook-dev-setup`.
