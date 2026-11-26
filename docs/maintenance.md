@@ -48,7 +48,7 @@ The install script can be rerun after resolving an error, but it does not provid
 
 ## Homebrew releases
 
-Create the public repository `ngominhtrungcmag/homebrew-macbook-dev-setup` and initialize its default branch. In the source repository, set the Actions secret `HOMEBREW_TAP_TOKEN` to a fine-grained GitHub token scoped to that tap with **Contents: Read and write**. The tap's default branch must allow writes from the token's owner.
+The public tap is `ngominhtrungcmag/homebrew-macbook-dev-setup`. The release workflow uses a dedicated SSH deploy key with write access to that tap. To rotate it, add the new public key to the tap with write access, update the source repository's Actions secret `HOMEBREW_TAP_DEPLOY_KEY` with the private key, and remove the old deploy key.
 
 Once the workflow is on the default branch, tag the tested commit with an unused version and push the tag:
 

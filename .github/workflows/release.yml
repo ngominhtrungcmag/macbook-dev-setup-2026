@@ -42,10 +42,16 @@ jobs:
           fi
       - name: Update the public tap
         env:
-          GH_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          HOMEBREW_TAP_DEPLOY_KEY: ${{ secrets.HOMEBREW_TAP_DEPLOY_KEY }}
         run: |
-          gh auth setup-git
-          gh repo clone ngominhtrungcmag/homebrew-macbook-dev-setup "$RUNNER_TEMP/tap"
+          ssh_dir="$(mktemp -d "$RUNNER_TEMP/tap-ssh.XXXXXX")"
+          umask 077
+          printf '%s\n' "$HOMEBREW_TAP_DEPLOY_KEY" > "$ssh_dir/key"
+          unset HOMEBREW_TAP_DEPLOY_KEY
+          trap 'unlink "$ssh_dir/key"' EXIT
+          printf '%s\n' 'github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl' > "$ssh_dir/known_hosts"
+          export GIT_SSH_COMMAND="ssh -i '$ssh_dir/key' -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile='$ssh_dir/known_hosts'"
+          git clone git@github.com:ngominhtrungcmag/homebrew-macbook-dev-setup.git "$RUNNER_TEMP/tap"
           cd "$RUNNER_TEMP/tap"
           file=Formula/macbook-dev-setup.rb
           mkdir -p Formula
