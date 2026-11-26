@@ -4,6 +4,7 @@ permissions:
   contents: read
 jobs:
   smoke:
+    timeout-minutes: 10
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
@@ -15,3 +16,5 @@ jobs:
       - name: ShellCheck
         if: runner.os == 'Linux'
         run: shellcheck scripts/*.sh tests/*.sh
+      - name: Validate JSON starter files
+        run: python3 -m json.tool dotfiles/dot_config/macbook-dev-setup/vscode-settings.json >/dev/null

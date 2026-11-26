@@ -10,3 +10,8 @@
 *.keystore
 Brewfile.backup*
 .local/
+
+# Local snapshots and personal overrides
+backups/
+snapshots/
+*.backup

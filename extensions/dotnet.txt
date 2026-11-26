@@ -1,0 +1,2 @@
+# C# Dev Kit is manual due to license requirements.
+ms-dotnettools.csharp

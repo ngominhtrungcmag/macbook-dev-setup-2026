@@ -1,0 +1,5 @@
+# Optional core editor extensions
+EditorConfig.EditorConfig
+redhat.vscode-yaml
+eamodio.gitlens
+timonwong.shellcheck

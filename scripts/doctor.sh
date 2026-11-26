@@ -18,7 +18,7 @@ for tool in brew git gh mise; do
   if command -v "$tool" >/dev/null 2>&1; then printf 'OK   %s\n' "$tool";
   else printf 'MISS %s (core)\n' "$tool"; status=1; fi
 done
-for tool in code dotnet node npm uv docker colima kubectl helm xcodebuild adb; do
+for tool in code dotnet node npm uv docker colima kubectl helm xcodebuild adb starship zoxide chezmoi codex claude agy; do
   if command -v "$tool" >/dev/null 2>&1; then printf 'OK   %s\n' "$tool";
   else printf 'SKIP %s (optional or not on PATH)\n' "$tool"; fi
 done
@@ -26,4 +26,5 @@ if ! xcode-select -p >/dev/null 2>&1; then echo 'MISS Xcode Command Line Tools';
 if command -v dotnet >/dev/null 2>&1; then dotnet --list-sdks || status=1; fi
 if command -v node >/dev/null 2>&1; then node --version || status=1; fi
 if command -v docker >/dev/null 2>&1; then docker --version || status=1; fi
+echo 'For profile-specific package checks, use: bash scripts/setup.sh --check --preset NAME'
 exit "$status"
