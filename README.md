@@ -1,164 +1,126 @@
 # MacBook Dev Setup 2026
 
-A modular, reviewable macOS workstation setup for developers. Start with the essentials, then add only the toolchains you need.
+**One command. Choose a developer mode. Install your workstation.**
 
-**Apple Silicon first · Homebrew · Bash · Optional development profiles**
+A macOS bootstrap toolkit for a new or existing MacBook: apps, command-line tools, development runtimes, IDEs, VS Code extensions and AI coding agents. Apple Silicon first; Intel best-effort. No profile-by-profile selection is required.
 
-> Reference date: 25 November 2026. This is a starter kit, not a fully tested macOS image. The scripts have basic static and dry-run tests; actual package installation and application setup still require macOS validation. Package availability changes over time.
+> Current implementation is a pre-release toolkit. Offline CI and mocked orchestration tests do not substitute for a fresh physical Mac installation. Administrator prompts, Apple dialogs, licenses, sign-in, full Xcode, platform SDKs and credentials may still need your attention.
 
-## Goals
+## Quick start
 
-- Make a fresh MacBook setup repeatable using readable Brewfiles.
-- Support backend, frontend, mobile, Python and DevOps workflows.
-- Keep developer credentials and system preferences out of a public repository.
-- Avoid destructive cleanup, automatic login, global shell edits and automatic background service startup.
-
-## 1. Before you start
-
-- Update macOS to a supported release, subject to your organization's policies.
-- Back up your data and check available disk space.
-- On Apple Silicon, open a native ARM64 terminal (`uname -m` should return `arm64`). Install Rosetta only if a trusted Intel-only tool requires it.
-- Install Apple Command Line Tools:
+Review [install.sh](install.sh) and the [package manifests](profiles/) before running. On a fresh Mac with no Git yet, download the repository archive using macOS's built-in curl and tar, then run the installer in one terminal command (this tracks the mutable main branch; use an audited commit/tag archive for repeatable production use):
 
 ```bash
-xcode-select --install
+(tmp="$(mktemp -d)" && trap 'rm -rf -- "$tmp"' EXIT && curl -fsSL --proto '=https' https://github.com/ngominhtrungcmag/macbook-dev-setup-2026/archive/refs/heads/main.tar.gz -o "$tmp/setup.tar.gz" && tar -xzf "$tmp/setup.tar.gz" -C "$tmp" && bash "$tmp/macbook-dev-setup-2026-main/install.sh" --mode full)
 ```
 
-- Install Homebrew using the instructions at [brew.sh](https://brew.sh/). Follow its shell/PATH instructions and open a new terminal.
+If you already cloned or extracted the repo:
 
 ```bash
-brew --version
+bash install.sh
 ```
 
-Homebrew supports a range of macOS versions and architectures. Apple Silicon is the primary target; Intel is best-effort, and not all profiles are available on every Mac.
-
-## 2. Quick start
-
-Clone the repository and enter its root directory:
+The default is Full. Use a named mode directly or open a single selection menu:
 
 ```bash
-git clone https://github.com/ngominhtrungcmag/macbook-dev-setup-2026.git
-cd macbook-dev-setup-2026
-bash scripts/bootstrap.sh
+bash install.sh --menu
+bash install.sh --mode dotnet
+bash install.sh --mode ai
 ```
 
-The bootstrap performs preflight checks and opens a menu. It never downloads a remote installer. Review the selected packages first (previews also work without Homebrew):
+## Choose your mode
+
+| Mode | Installs |
+| --- | --- |
+| `full` (default) | All package profiles, Rider, Android Studio, Node.js, Python, modern terminal, desktop apps, AI agents/apps and VS Code extensions |
+| `minimal` | Core CLI tools, Git, GitHub CLI, mise and VS Code |
+| `dotnet` | .NET 10 SDK, Rider, Node.js, Docker/Colima, Kubernetes tools, database/API apps, modern terminal and relevant extensions |
+| `frontend` | Node.js, Chrome, VS Code frontend extensions and modern terminal |
+| `mobile` | .NET SDK, Android Studio, Node.js and terminal; full Xcode and project SDKs manual |
+| `devops` | Docker CLI, Colima, Compose, kubectl, Helm, database/API apps and terminal |
+| `python` | uv, Python 3.13, Python editor extensions and terminal |
+| `ai` | Codex, Claude Code, Antigravity CLI, ChatGPT, Claude, Cursor, Antigravity and terminal |
+| `everyday` | Desktop utilities, Chrome, Node.js and modern terminal |
+| `custom` | Choose explicit package profiles |
+
+Core tools and core VS Code extensions are included in every mode.
 
 ```bash
-bash scripts/setup.sh --dry-run dotnet frontend devops
-bash scripts/setup.sh dotnet frontend devops
+bash install.sh --list
+bash install.sh --dry-run --mode full
+bash install.sh --mode full --skip-ai
+bash install.sh --mode dotnet --with-ai
+bash install.sh --mode custom dotnet terminal ai-codex
 ```
 
-For a curated .NET/Blazor workstation or another preset:
+Non-AI named modes other than Full omit AI by default; add `--with-ai` to include all AI profiles. Full includes AI unless `--skip-ai` is supplied. Custom mode accepts `dotnet frontend mobile devops python apps terminal ide ai-codex ai-claude ai-google ai-desktop`.
+
+## What happens automatically
+
+1. Validate native macOS architecture and normal-user execution.
+2. Request Apple Command Line Tools installation if missing and wait for completion.
+3. Install Homebrew from its official upstream installer if missing.
+4. Install the selected Brewfiles, keeping existing packages and continuing across failed profile groups.
+5. For frontend/Python profiles, install Node.js 26 via mise and Python 3.13 via uv. Keep existing mise configuration.
+6. Install relevant VS Code extensions into a dedicated `MacBook Dev Setup` profile.
+7. Create missing Zsh startup files only; existing files are not overwritten or modified.
+8. Verify the selected Homebrew packages; report failed stages and return nonzero if necessary.
+
+The same command can be rerun. Package versions and dependencies may change over time; this is not a version-locked system image.
+
+## Installed tools
+
+| Category | Examples |
+| --- | --- |
+| Core | Git, GitHub CLI, jq, ripgrep, fd, fzf, bat, mise, VS Code |
+| .NET | .NET 10 SDK, Rider (license may be required) |
+| Frontend | Node.js 26, npm, Chrome |
+| Python | uv, Python 3.13 |
+| Mobile | Android Studio; full Xcode/Android SDK/MAUI workloads manual |
+| Containers | Colima, Docker CLI, Compose, kubectl, Helm |
+| Desktop | iTerm2, Rectangle, DBeaver, Postman |
+| Terminal | Ghostty, Starship, zoxide, Nerd Font, chezmoi |
+| AI CLI | OpenAI Codex, Claude Code, Google Antigravity CLI |
+| AI desktop | ChatGPT, Claude, Cursor, Google Antigravity |
+
+Check vendor compatibility and licensing before installing. AI tools are installed, not launched or signed in. The deprecated standalone Codex desktop cask is not included; use the supported ChatGPT cask. Gemini CLI migration details are in [AI tools](docs/ai-tools.md).
+
+## What remains manual
+
+- Confirm macOS/Homebrew administrator prompts and install dialogs.
+- Sign in to GitHub, IDEs and AI apps; configure licenses and permissions.
+- Install full Xcode and configure required Android SDKs/MAUI workloads, project-specific Java/SDK versions and signing credentials.
+- Start Colima and configure the Compose plugin when needed. No background VM or service is started automatically.
+- If shell configuration already exists, review and add Homebrew PATH or mise activation yourself.
+- Follow project version pins, configure local HTTPS trust and databases as needed.
+
+See [toolchains](docs/toolchains.md) and [first-day checklist](docs/checklist.md). Never run the entire installer with sudo.
+
+## Advanced usage
+
+The original modular scripts remain available:
 
 ```bash
-bash scripts/setup.sh --list
-bash scripts/setup.sh --dry-run --preset dotnet-fullstack
-bash scripts/setup.sh --preset dotnet-fullstack
-```
-
-For core tools only:
-
-```bash
-bash scripts/setup.sh
-```
-
-To check the installed packages without installing missing ones:
-
-```bash
-bash scripts/setup.sh --check dotnet frontend devops
+bash scripts/setup.sh --dry-run dotnet frontend
+bash scripts/setup.sh --check dotnet frontend
 bash scripts/doctor.sh
-```
-
-Finish the manual steps in [Toolchains](docs/toolchains.md), including Node.js activation, mobile SDKs and Docker Compose configuration. Do not run the scripts with `sudo`; Homebrew or application installers may independently request authorization.
-
-## 3. Profiles
-
-The core Brewfile is included with every run. Profiles are additive and can be combined.
-
-| Profile | Contents | Manual follow-up |
-| --- | --- | --- |
-| Core (always) | Git, GitHub CLI, jq, ripgrep, fd, fzf, bat, mise, VS Code, ShellCheck | Git identity and shell integration |
-| `frontend` | Chrome | Node.js through mise; package manager per project |
-| `dotnet` | .NET 10 SDK cask | C# extensions, HTTPS certificate, SDK verification |
-| `mobile` | Android Studio | Xcode, Android SDK, simulator/emulator, project workloads |
-| `devops` | Colima, Docker CLI, Docker Compose, kubectl, Helm | Start container runtime, configure Compose |
-| `python` | uv | Select Python version and project dependencies |
-| `apps` | iTerm2, Rectangle, DBeaver, Postman | Optional app sign-in and license checks |
-| `terminal` | Ghostty, Starship, zoxide, Nerd Font, chezmoi | Review optional starter dotfiles |
-| `ai-codex` | OpenAI Codex CLI | Sign in manually |
-| `ai-claude` | Claude Code | Sign in manually |
-| `ai-google` | Google Antigravity CLI | Sign in manually; see migration note |
-
-`all` selects non-AI profiles only. AI tools are explicit opt-in (`ai` selects all three); a smaller combination is recommended. Review licensing, architecture compatibility and package requirements first.
-
-## 4. Suggested 2026 toolchains
-
-- **.NET / C# / Blazor:** .NET 10 LTS for new long-lived projects; use .NET 11 STS when required. Respect the project's `global.json`.
-- **JavaScript / TypeScript:** Node.js 26 or 24 LTS, using the version and package manager declared by the project.
-- **Python:** uv and per-project Python environments.
-- **Containers:** Colima + Docker CLI as an optional local runtime. Docker Desktop and OrbStack are alternative choices; avoid running multiple engines unintentionally.
-- **Editors:** VS Code by default; JetBrains Rider or another editor can be added manually.
-
-These release recommendations reflect the reference date, not a promise that future versions remain supported. See the [official .NET release policy](https://learn.microsoft.com/en-us/dotnet/core/releases-and-support) and [Node.js release table](https://nodejs.org/en/about/previous-releases).
-
-## 5. Developer experience (optional)
-
-```bash
-# Preview namespaced configuration and editor extensions.
 bash scripts/dotfiles.sh --plan
-bash scripts/dotfiles.sh --diff
-bash scripts/extensions.sh dotnet frontend
-# Explicitly apply only after reviewing the output.
-bash scripts/dotfiles.sh --apply
-bash scripts/extensions.sh --apply dotnet frontend
-# Optional AI coding tools; no sign-in or credential changes.
-bash scripts/setup.sh --dry-run ai-codex ai-google
-# Snapshot installed packages, not application data.
+bash scripts/extensions.sh --dry-run all
 bash scripts/backup.sh capture "$HOME"
 ```
 
-See [developer experience](docs/developer-experience.md), [AI tools](docs/ai-tools.md), and [backup and restore](docs/backup-restore.md). The starter configs are stored under `~/.config/macbook-dev-setup`; activating them is a separate manual step. VS Code extensions are installed into a dedicated profile only after explicit opt-in.
+Read [developer experience](docs/developer-experience.md), [backup and restore](docs/backup-restore.md), [maintenance](docs/maintenance.md), [inspiration](docs/inspiration.md), [roadmap](ROADMAP.md) and [changelog](CHANGELOG.md).
 
-## 6. Documentation
+## Safety and testing
 
-- [Toolchain configuration](docs/toolchains.md)
-- [macOS first-day and security checklist](docs/checklist.md)
-- [Maintenance, recovery and troubleshooting](docs/maintenance.md)
-- [Roadmap](ROADMAP.md) and [inspiration / upstream references](docs/inspiration.md)
-- [Changelog](CHANGELOG.md)
-- [Contributing](CONTRIBUTING.md)
-
-## 7. Repository layout
-
-```text
-Brewfile                  # Core packages
-profiles/                 # Optional Brewfiles
-scripts/bootstrap.sh      # First-run preflight
-scripts/menu.sh           # Interactive profile selection
-scripts/setup.sh          # Install, preview or check
-scripts/doctor.sh         # Basic diagnostics
-scripts/dotfiles.sh       # Namespaced chezmoi starter configs
-scripts/extensions.sh     # VS Code profile extensions
-scripts/backup.sh         # Private package inventory and restore
-dotfiles/                 # Reviewed configuration examples
-extensions/               # Extension manifests
-docs/                     # Manual setup guides
-tests/test-setup.sh        # Offline smoke tests
-.github/workflows/ci.yml  # Syntax and smoke-test workflow
-```
-
-## 8. Testing and safety
+No blanket cleanup, security changes, credential capture or unattended account login. The default Full mode intentionally installs AI packages; use `--skip-ai` or another mode to omit them. Homebrew casks may require permissions, and software installs can update dependencies. Review the package plan first if you are on an existing or managed Mac.
 
 ```bash
 bash tests/test-setup.sh
-shellcheck scripts/*.sh tests/*.sh
+bash tests/test-install.sh
+shellcheck install.sh scripts/*.sh tests/*.sh
 ```
 
-The setup uses Homebrew Bundle with `--no-upgrade` and does not call `brew bundle cleanup`. Dependencies can still change during installation. Brewfiles describe desired packages, not exact version locks. To update tools, use the maintenance guide. The core installer does not modify macOS security settings, install credentials, or overwrite your shell config. Optional extensions and dotfiles require an explicit apply step. Homebrew Brewfiles are executable Ruby; restore only trusted snapshots.
+Tests exercise Bash syntax, mode selection, preview, profile deduplication and mocked orchestration on CI. They do not download real packages or change the runner's workstation. Report platform, mode and errors with personal information redacted.
 
-## 9. Contributing
-
-Issues and pull requests are welcome. Please provide macOS version, architecture and the failing profile, but redact tokens, paths containing sensitive identities, employer details and private repository URLs.
-
-License: MIT (see [LICENSE](LICENSE)).
+MIT License. Contributions welcome.

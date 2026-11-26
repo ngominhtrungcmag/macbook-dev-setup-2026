@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased — one-command installer (v0.7)
+
+- Add root install.sh with Full, Minimal, .NET, Frontend, Mobile, DevOps, Python, AI, Everyday and Custom modes; optional menu and dry-run.
+- Bootstrap Apple CLT and official Homebrew when missing; install Node.js, Python and dedicated VS Code extensions automatically by selected mode.
+- Add Rider and AI desktop applications alongside existing agents. Support AI opt-in/out and continue past failed package groups.
+- Preserve existing Zsh files, verify packages and extend mocked orchestration tests.
+
+Full physical macOS validation remains pending.
+
 ## Unreleased — roadmap implementation pass (v0.2–v0.6)
 
 - Add bootstrap preflight, interactive installer and named workstation presets.

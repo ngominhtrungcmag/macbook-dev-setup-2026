@@ -3,8 +3,8 @@
 set -euo pipefail
 
 root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
-profiles=(frontend dotnet mobile devops python apps terminal)
-ai_profiles=(ai-codex ai-claude ai-google)
+profiles=(frontend dotnet mobile devops python apps terminal ide)
+ai_profiles=(ai-codex ai-claude ai-google ai-desktop)
 selected=("$root/Brewfile")
 mode=install
 
@@ -13,8 +13,8 @@ usage() {
 Usage: bash scripts/setup.sh [--dry-run|--check] [PROFILE ...] [--preset NAME]
 
 Core tools are always included. Optional profiles:
-  frontend dotnet mobile devops python apps terminal
-  ai-codex ai-claude ai-google (explicit opt-in only)
+  frontend dotnet mobile devops python apps terminal ide
+  ai-codex ai-claude ai-google ai-desktop (explicit opt-in in this low-level script)
   ai   (all AI tools; review licensing first)
   all  (all non-AI profiles)
 
@@ -59,7 +59,7 @@ while [[ $# -gt 0 ]]; do
         echo 'Choose only one of --dry-run and --check.' >&2; exit 2
       fi
       mode="${1#--}" ;;
-    frontend|dotnet|mobile|devops|python|apps|terminal|ai-codex|ai-claude|ai-google) add_profile "$1" ;;
+    frontend|dotnet|mobile|devops|python|apps|terminal|ide|ai-codex|ai-claude|ai-google|ai-desktop) add_profile "$1" ;;
     all) for p in "${profiles[@]}"; do add_profile "$p"; done ;;
     ai) for p in "${ai_profiles[@]}"; do add_profile "$p"; done ;;
     *) echo "Unknown option/profile: $1" >&2; usage >&2; exit 2 ;;
@@ -105,10 +105,12 @@ for file in "${selected[@]}"; do
   if [[ "$mode" == check ]]; then
     brew bundle check --no-upgrade --verbose --file="$file" || status=1
   else
-    brew bundle install --no-upgrade --file="$file"
+    brew bundle install --no-upgrade --file="$file" || status=1
   fi
 done
-if [[ "$mode" == install ]]; then
+if [[ "$mode" == install && "$status" == 0 ]]; then
   printf '\nPackages installed. Complete manual toolchain steps in docs/toolchains.md.\n'
+elif [[ "$status" != 0 ]]; then
+  printf '\nOne or more Brewfiles failed. Review the output and rerun.\n' >&2
 fi
 exit "$status"
