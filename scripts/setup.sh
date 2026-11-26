@@ -3,17 +3,24 @@
 set -euo pipefail
 
 root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
-profiles=(frontend dotnet mobile devops python apps)
+profiles=(frontend dotnet mobile devops python apps terminal)
+ai_profiles=(ai-codex ai-claude ai-google)
 selected=("$root/Brewfile")
 mode=install
 
 usage() {
   cat <<'HELP'
-Usage: bash scripts/setup.sh [--dry-run|--check] [PROFILE ...]
+Usage: bash scripts/setup.sh [--dry-run|--check] [PROFILE ...] [--preset NAME]
 
 Core tools are always included. Optional profiles:
-  frontend dotnet mobile devops python apps
-  all  (all optional profiles; review before installing)
+  frontend dotnet mobile devops python apps terminal
+  ai-codex ai-claude ai-google (explicit opt-in only)
+  ai   (all AI tools; review licensing first)
+  all  (all non-AI profiles)
+
+Presets: minimal, dotnet-fullstack, web, mobile, platform, python
+--preset NAME  Select a curated combination of profiles.
+--list         List profiles and presets.
 
 --dry-run  Print selected Brewfiles without installing or changing anything.
 --check    Check selected packages without installing them.
@@ -29,16 +36,32 @@ add_profile() {
   selected+=("$file")
 }
 
+add_preset() {
+  case "$1" in
+    minimal) ;;
+    dotnet-fullstack) add_profile dotnet; add_profile frontend; add_profile devops; add_profile terminal ;;
+    web) add_profile frontend; add_profile terminal ;;
+    mobile) add_profile dotnet; add_profile mobile ;;
+    platform) add_profile devops; add_profile terminal ;;
+    python) add_profile python; add_profile terminal ;;
+    *) echo "Unknown preset: $1" >&2; exit 2 ;;
+  esac
+}
+
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --help|-h) usage; exit 0 ;;
+    --help|-h|--list) usage; exit 0 ;;
+    --preset)
+      if [[ $# -lt 2 ]]; then echo 'Missing preset name.' >&2; exit 2; fi
+      shift; add_preset "$1" ;;
     --dry-run|--check)
       if [[ "$mode" != install && "$mode" != "${1#--}" ]]; then
         echo 'Choose only one of --dry-run and --check.' >&2; exit 2
       fi
       mode="${1#--}" ;;
-    frontend|dotnet|mobile|devops|python|apps) add_profile "$1" ;;
+    frontend|dotnet|mobile|devops|python|apps|terminal|ai-codex|ai-claude|ai-google) add_profile "$1" ;;
     all) for p in "${profiles[@]}"; do add_profile "$p"; done ;;
+    ai) for p in "${ai_profiles[@]}"; do add_profile "$p"; done ;;
     *) echo "Unknown option/profile: $1" >&2; usage >&2; exit 2 ;;
   esac
   shift

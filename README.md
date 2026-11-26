@@ -34,11 +34,27 @@ Homebrew supports a range of macOS versions and architectures. Apple Silicon is 
 
 ## 2. Quick start
 
-Download or clone this repository after it has been published, then enter its root directory. Review the selected packages first:
+Clone the repository and enter its root directory:
+
+```bash
+git clone https://github.com/ngominhtrungcmag/macbook-dev-setup-2026.git
+cd macbook-dev-setup-2026
+bash scripts/bootstrap.sh
+```
+
+The bootstrap performs preflight checks and opens a menu. It never downloads a remote installer. Review the selected packages first (previews also work without Homebrew):
 
 ```bash
 bash scripts/setup.sh --dry-run dotnet frontend devops
 bash scripts/setup.sh dotnet frontend devops
+```
+
+For a curated .NET/Blazor workstation or another preset:
+
+```bash
+bash scripts/setup.sh --list
+bash scripts/setup.sh --dry-run --preset dotnet-fullstack
+bash scripts/setup.sh --preset dotnet-fullstack
 ```
 
 For core tools only:
@@ -69,8 +85,12 @@ The core Brewfile is included with every run. Profiles are additive and can be c
 | `devops` | Colima, Docker CLI, Docker Compose, kubectl, Helm | Start container runtime, configure Compose |
 | `python` | uv | Select Python version and project dependencies |
 | `apps` | iTerm2, Rectangle, DBeaver, Postman | Optional app sign-in and license checks |
+| `terminal` | Ghostty, Starship, zoxide, Nerd Font, chezmoi | Review optional starter dotfiles |
+| `ai-codex` | OpenAI Codex CLI | Sign in manually |
+| `ai-claude` | Claude Code | Sign in manually |
+| `ai-google` | Google Antigravity CLI | Sign in manually; see migration note |
 
-`all` selects every profile, but a smaller combination is recommended. Review licensing, architecture compatibility and package requirements first.
+`all` selects non-AI profiles only. AI tools are explicit opt-in (`ai` selects all three); a smaller combination is recommended. Review licensing, architecture compatibility and package requirements first.
 
 ## 4. Suggested 2026 toolchains
 
@@ -82,35 +102,62 @@ The core Brewfile is included with every run. Profiles are additive and can be c
 
 These release recommendations reflect the reference date, not a promise that future versions remain supported. See the [official .NET release policy](https://learn.microsoft.com/en-us/dotnet/core/releases-and-support) and [Node.js release table](https://nodejs.org/en/about/previous-releases).
 
-## 5. Documentation
+## 5. Developer experience (optional)
+
+```bash
+# Preview namespaced configuration and editor extensions.
+bash scripts/dotfiles.sh --plan
+bash scripts/dotfiles.sh --diff
+bash scripts/extensions.sh dotnet frontend
+# Explicitly apply only after reviewing the output.
+bash scripts/dotfiles.sh --apply
+bash scripts/extensions.sh --apply dotnet frontend
+# Optional AI coding tools; no sign-in or credential changes.
+bash scripts/setup.sh --dry-run ai-codex ai-google
+# Snapshot installed packages, not application data.
+bash scripts/backup.sh capture "$HOME"
+```
+
+See [developer experience](docs/developer-experience.md), [AI tools](docs/ai-tools.md), and [backup and restore](docs/backup-restore.md). The starter configs are stored under `~/.config/macbook-dev-setup`; activating them is a separate manual step. VS Code extensions are installed into a dedicated profile only after explicit opt-in.
+
+## 6. Documentation
 
 - [Toolchain configuration](docs/toolchains.md)
 - [macOS first-day and security checklist](docs/checklist.md)
 - [Maintenance, recovery and troubleshooting](docs/maintenance.md)
+- [Roadmap](ROADMAP.md) and [inspiration / upstream references](docs/inspiration.md)
+- [Changelog](CHANGELOG.md)
 - [Contributing](CONTRIBUTING.md)
 
-## 6. Repository layout
+## 7. Repository layout
 
 ```text
 Brewfile                  # Core packages
 profiles/                 # Optional Brewfiles
+scripts/bootstrap.sh      # First-run preflight
+scripts/menu.sh           # Interactive profile selection
 scripts/setup.sh          # Install, preview or check
 scripts/doctor.sh         # Basic diagnostics
+scripts/dotfiles.sh       # Namespaced chezmoi starter configs
+scripts/extensions.sh     # VS Code profile extensions
+scripts/backup.sh         # Private package inventory and restore
+dotfiles/                 # Reviewed configuration examples
+extensions/               # Extension manifests
 docs/                     # Manual setup guides
 tests/test-setup.sh        # Offline smoke tests
 .github/workflows/ci.yml  # Syntax and smoke-test workflow
 ```
 
-## 7. Testing and safety
+## 8. Testing and safety
 
 ```bash
 bash tests/test-setup.sh
 shellcheck scripts/*.sh tests/*.sh
 ```
 
-The setup uses Homebrew Bundle with `--no-upgrade` and does not call `brew bundle cleanup`. Dependencies can still change during installation. Brewfiles describe desired packages, not exact version locks. To update tools, use the maintenance guide. This starter does not modify macOS security settings, install credentials, or overwrite your shell config.
+The setup uses Homebrew Bundle with `--no-upgrade` and does not call `brew bundle cleanup`. Dependencies can still change during installation. Brewfiles describe desired packages, not exact version locks. To update tools, use the maintenance guide. The core installer does not modify macOS security settings, install credentials, or overwrite your shell config. Optional extensions and dotfiles require an explicit apply step. Homebrew Brewfiles are executable Ruby; restore only trusted snapshots.
 
-## 8. Contributing
+## 9. Contributing
 
 Issues and pull requests are welcome. Please provide macOS version, architecture and the failing profile, but redact tokens, paths containing sensitive identities, employer details and private repository URLs.
 
