@@ -1,0 +1,13 @@
+# Core developer tools. Review before installing.
+brew "git"
+brew "gh"
+brew "curl"
+brew "jq"
+brew "ripgrep"
+brew "fd"
+brew "fzf"
+brew "bat"
+brew "tree"
+brew "shellcheck"
+brew "mise"
+cask "visual-studio-code"

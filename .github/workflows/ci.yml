@@ -1,0 +1,17 @@
+name: Shell checks
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  smoke:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run offline smoke tests
+        run: bash tests/test-setup.sh
+      - name: ShellCheck
+        if: runner.os == 'Linux'
+        run: shellcheck scripts/*.sh tests/*.sh
